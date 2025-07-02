@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -12,7 +13,7 @@ void malloc_init(){
 }
 
 struct mcb{
-  int size;
+  size_t size;
   int is_available;
 };
 
@@ -20,15 +21,17 @@ void my_free(void* p_firstbyte){
   // p_firstbyte indecates the starting address of the memory block after mcb
   struct mcb* p_target_mcb = (struct mcb*) (p_firstbyte - sizeof(struct mcb));
   p_target_mcb->is_available = 1;
+  p_firstbyte = NULL;
   return;
 }
 
-void* my_malloc(int size){
+void* my_malloc(size_t size){
   if(!is_initialized){
     malloc_init();
   }
 
-  void* p_current = p_seg_start;
+  // Changed p_current to char* to move around (2/7/2024)
+  char* p_current = (char*) p_seg_start;
   struct mcb* p_current_mcb;
   int numOfBytes;
 
@@ -45,8 +48,8 @@ void* my_malloc(int size){
   // Request memory by moving sbrk
   numOfBytes = size + sizeof(struct mcb);
   sbrk(numOfBytes);
-  p_seg_end += numOfBytes;
-  struct mcb* p_new_mcb = p_current;
+  p_seg_end = sbrk(0);
+  struct mcb* p_new_mcb = (struct mcb*) p_current;
   p_new_mcb->size = size;
   p_new_mcb->is_available = 0;
   return p_seg_end - p_new_mcb->size;
