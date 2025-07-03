@@ -17,9 +17,9 @@ struct mcb{
   int is_available;
 };
 
-void my_free(void* p_firstbyte){
+void my_free(void** p_firstbyte){
   // p_firstbyte indecates the starting address of the memory block after mcb
-  struct mcb* p_target_mcb = (struct mcb*) (p_firstbyte - sizeof(struct mcb));
+  struct mcb* p_target_mcb = (struct mcb*) ((char*) p_firstbyte - sizeof(struct mcb));
   p_target_mcb->is_available = 1;
   p_firstbyte = NULL;
   return;
