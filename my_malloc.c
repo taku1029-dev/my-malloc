@@ -1,6 +1,13 @@
+#ifndef MY_MALLOC
+#define MY_MALLOC
+
 #include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 int is_initialized = 0;
 void* p_seg_start;
@@ -17,12 +24,14 @@ struct mcb{
   int is_available;
 };
 
-void my_free(void** p_firstbyte){
+void my_free(void* p_firstbyte){
+  if(p_firstbyte == NULL){
+    return;
+  }
+  
   // p_firstbyte indecates the starting address of the memory block after mcb
   struct mcb* p_target_mcb = (struct mcb*) ((char*) p_firstbyte - sizeof(struct mcb));
   p_target_mcb->is_available = 1;
-  p_firstbyte = NULL;
-  return;
 }
 
 void* my_malloc(size_t size){
@@ -52,5 +61,11 @@ void* my_malloc(size_t size){
   struct mcb* p_new_mcb = (struct mcb*) p_current;
   p_new_mcb->size = size;
   p_new_mcb->is_available = 0;
-  return p_seg_end - p_new_mcb->size;
+  return ((char*)p_seg_end) - p_new_mcb->size;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
