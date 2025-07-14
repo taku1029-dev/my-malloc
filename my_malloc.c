@@ -1,26 +1,11 @@
-#ifndef MY_MALLOC
-#define MY_MALLOC
-
-#include <stddef.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-typedef struct mcb{
-  size_t size;
-  int is_available;
-  struct mcb* next;
-} mcb_t;
+#include "my_malloc.h"
 
 int is_initialized = 0;
 mcb_t* head;
 
 void malloc_init(size_t size){
   is_initialized = 1;
-  head = sbrk(size + sizeof(mcb_t));
+  head = (mcb_t*)sbrk(size + sizeof(mcb_t));
   head->size = size;
   head->is_available = 1;
   head->next = NULL;
@@ -64,9 +49,3 @@ void* my_malloc(size_t size){
   p_new_mcb->next = NULL;
   return (char*)p_new_mcb + sizeof(mcb_t);
 }
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
